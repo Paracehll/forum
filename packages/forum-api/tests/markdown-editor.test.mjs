@@ -49,44 +49,71 @@ test('invalid URLs, empty selections and multiline selections are ignored', () =
   }
 });
 
-function editor({ success = true, nativeInput = true, throws = false } = {}) {
+test('a URL selection is never linkified', () => {
+  for (const selection of [
+    'https://old.example',
+    '  HTTPS://old.example/a(b)  ',
+  ]) {
+    assert.equal(createMarkdownLink(selection, 'https://new.example'), null);
+  }
+  // A URL pasted over non-URL text is still a normal Markdown link.
+  assert.equal(
+    createMarkdownLink('文字', 'https://new.example'),
+    '[文字](https://new.example/)',
+  );
+});
+
+function editor({
+  success = true,
+  nativeInput = true,
+  throws = false,
+  value = '前文字后',
+  selectionStart = 1,
+  selectionEnd = 3,
+  clipboard = 'https://example.com',
+} = {}) {
   const element = Object.assign(new EventTarget(), {
-    value: '前文字后',
-    selectionStart: 1,
-    selectionEnd: 3,
+    value,
+    selectionStart,
+    selectionEnd,
     maxLength: -1,
     disabled: false,
     readOnly: false,
   });
   let inputCount = 0;
-  let commandCount = 0;
+  const commands = [];
   element.addEventListener('input', () => inputCount++);
   element.ownerDocument = {
     activeElement: element,
     defaultView: { Event },
     execCommand(command, showUI, text) {
-      commandCount++;
+      commands.push(command);
       assert.equal(command, 'insertText');
       assert.equal(showUI, false);
       if (throws) throw new Error('Unavailable');
       if (!success) return false;
+      const start = element.selectionStart;
       element.value =
-        element.value.slice(0, element.selectionStart) +
+        element.value.slice(0, start) +
         text +
         element.value.slice(element.selectionEnd);
+      element.selectionStart = start;
+      element.selectionEnd = start + text.length;
       if (nativeInput)
         element.dispatchEvent(new Event('input', { bubbles: true }));
       return true;
     },
   };
   const event = Object.assign(new Event('paste', { cancelable: true }), {
-    clipboardData: { getData: () => 'https://example.com' },
+    clipboardData: {
+      getData: (type) => (type === 'text/plain' ? clipboard : ''),
+    },
   });
   return {
     element,
     event,
     inputs: () => inputCount,
-    commands: () => commandCount,
+    commands: () => commands,
   };
 }
 
@@ -99,6 +126,37 @@ for (const nativeInput of [true, false]) {
     assert.equal(state.inputs(), 1);
   });
 }
+
+test('a URL pasted over a selected URL replaces it instead of creating a link', () => {
+  const oldUrl = 'https://old.example/path';
+  for (const nativeInput of [true, false]) {
+    const state = editor({
+      nativeInput,
+      value: oldUrl,
+      selectionStart: 0,
+      selectionEnd: oldUrl.length,
+      clipboard: 'https://new.example/',
+    });
+    assert.equal(handleMarkdownLinkPaste(state.event, state.element), true);
+    assert.equal(state.element.value, 'https://new.example/');
+    assert.equal(state.event.defaultPrevented, true);
+    assert.deepEqual(state.commands(), ['insertText']);
+    assert.equal(state.inputs(), 1);
+  }
+});
+
+test('a non-URL paste over a URL selection keeps native paste', () => {
+  const oldUrl = 'https://old.example';
+  const state = editor({
+    value: oldUrl,
+    selectionStart: 0,
+    selectionEnd: oldUrl.length,
+    clipboard: '普通文字',
+  });
+  assert.equal(handleMarkdownLinkPaste(state.event, state.element), false);
+  assert.equal(state.event.defaultPrevented, false);
+  assert.deepEqual(state.commands(), []);
+});
 
 for (const options of [{ success: false }, { throws: true }]) {
   test(`failed insertion leaves native paste available: ${JSON.stringify(options)}`, () => {
@@ -138,7 +196,7 @@ test('readonly, disabled, unfocused, empty and over-limit selections never invok
     setup(state);
     const prevented = state.event.defaultPrevented;
     assert.equal(handleMarkdownLinkPaste(state.event, state.element), false);
-    assert.equal(state.commands(), 0);
+    assert.deepEqual(state.commands(), []);
     assert.equal(state.event.defaultPrevented, prevented);
   }
   assert.equal(handleMarkdownLinkPaste(editor().event, null), false);
