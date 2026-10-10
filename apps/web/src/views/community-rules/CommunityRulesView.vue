@@ -18,7 +18,7 @@ const permissions = [
 
 <template>
   <div class="page-container py-4 md:py-6">
-    <section class="mx-auto max-w-2xl text-sm leading-6">
+    <section class="mx-auto max-w-4xl text-sm leading-6">
       <header class="mb-5">
         <h1 class="text-2xl font-bold tracking-tight text-ink">社区守则</h1>
       </header>

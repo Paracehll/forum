@@ -7,7 +7,7 @@ const route = useRoute();
 
 <template>
   <div class="page-container py-4 md:py-8">
-    <div class="mx-auto max-w-6xl">
+    <div class="mx-auto max-w-4xl">
       <h1 class="sr-only">账户设置</h1>
 
       <div

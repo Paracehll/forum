@@ -116,7 +116,7 @@ function changePage(nextPage: number) {
 
 <template>
   <div class="page-container py-4 md:py-6">
-    <div class="min-w-0 space-y-4">
+    <div class="mx-auto min-w-0 max-w-4xl space-y-4">
       <header>
         <h1 class="text-2xl font-bold tracking-tight text-ink">
           {{ selectedCategoryItem.title }}
