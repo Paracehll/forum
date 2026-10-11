@@ -117,10 +117,29 @@ function changePage(nextPage: number) {
 <template>
   <div class="page-container py-4 md:py-6">
     <div class="mx-auto min-w-0 max-w-4xl space-y-4">
-      <header>
-        <h1 class="text-2xl font-bold tracking-tight text-ink">
+      <header class="flex items-center justify-between gap-3">
+        <h1
+          class="min-w-0 break-words text-2xl font-bold tracking-tight text-ink"
+        >
           {{ selectedCategoryItem.title }}
         </h1>
+        <div
+          v-if="categoryStore.canPublish(selectedCategory)"
+          class="shrink-0 lg:hidden"
+        >
+          <XButton
+            class="whitespace-nowrap"
+            :as="RouterLink"
+            :to="{
+              name: 'post-create',
+              query: { category: selectedCategory },
+            }"
+            aria-label="发表帖子"
+          >
+            <AddOutlined class="size-4" aria-hidden="true" />
+            发帖
+          </XButton>
+        </div>
       </header>
 
       <aside
@@ -167,25 +186,29 @@ function changePage(nextPage: number) {
       </aside>
       <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
         <PostFilters
-          class="order-2 lg:order-1 lg:flex-1"
+          class="lg:flex-1"
           :category-id="selectedCategoryItem.id"
           :query="searchQuery"
           :tag-id="selectedTagId"
           :sort="selectedSort"
           @apply="applyFilters"
         />
-        <XButton
+        <div
           v-if="categoryStore.canPublish(selectedCategory)"
-          class="order-1 self-end lg:order-2 lg:self-auto"
-          :as="RouterLink"
-          :to="{
-            name: 'post-create',
-            query: { category: selectedCategory },
-          }"
+          class="hidden shrink-0 lg:block"
         >
-          <AddOutlined class="size-4" aria-hidden="true" />
-          发表帖子
-        </XButton>
+          <XButton
+            class="whitespace-nowrap"
+            :as="RouterLink"
+            :to="{
+              name: 'post-create',
+              query: { category: selectedCategory },
+            }"
+          >
+            <AddOutlined class="size-4" aria-hidden="true" />
+            发表帖子
+          </XButton>
+        </div>
       </div>
       <PostList
         :posts="posts"
