@@ -113,7 +113,7 @@ async function submitPost() {
   <div class="page-container py-4 md:py-6">
     <div class="mx-auto max-w-4xl">
       <section>
-        <h1 class="text-xl font-bold text-ink">发表帖子</h1>
+        <h1 class="text-2xl font-bold text-ink">发表帖子</h1>
 
         <div v-if="!whoami.isSignedIn" class="mt-6 py-4 text-sm text-muted">
           登录后才能发表帖子，请使用页面右上角的登录入口。

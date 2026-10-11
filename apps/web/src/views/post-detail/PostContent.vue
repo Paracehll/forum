@@ -20,7 +20,7 @@ const hasBeenUpdated = computed(
 <template>
   <article class="pb-3">
     <h1
-      class="text-xl leading-snug font-bold tracking-tight text-ink wrap-anywhere sm:text-2xl"
+      class="text-2xl leading-snug font-bold tracking-tight text-ink wrap-anywhere"
     >
       {{ post.title }}
     </h1>

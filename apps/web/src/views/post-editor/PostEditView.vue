@@ -166,7 +166,7 @@ void categoryStore.initialize().then(() => {
         </template>
 
         <section v-if="post && canEdit">
-          <h1 class="text-xl font-bold text-ink">编辑帖子</h1>
+          <h1 class="text-2xl font-bold text-ink">编辑帖子</h1>
           <PostForm
             v-model:title="title"
             v-model:category="categorySlug"
@@ -188,7 +188,7 @@ void categoryStore.initialize().then(() => {
         </section>
 
         <section v-else-if="post" class="py-8 text-center">
-          <h1 class="text-xl font-bold text-ink">无法编辑帖子</h1>
+          <h1 class="text-2xl font-bold text-ink">无法编辑帖子</h1>
           <p class="mt-2 text-sm text-muted">
             {{
               whoami.isSignedIn
