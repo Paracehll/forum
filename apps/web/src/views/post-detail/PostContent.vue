@@ -4,6 +4,7 @@ import { computed } from 'vue';
 
 import type { Post } from '@/api';
 import MarkdownContent from '@/components/markdown/MarkdownContent.vue';
+import { formatCount } from '@/utils/formatCount';
 
 const props = defineProps<{
   post: Post;
@@ -25,27 +26,20 @@ const hasBeenUpdated = computed(
     </h1>
 
     <div
-      class="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted"
+      class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted"
     >
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span class="text-sm font-bold text-ink">
-          {{ post.authorUsername }}
-        </span>
-        <span>
-          发布于
-          <XTime :time="post.createdAt" preset="relative" />
-        </span>
-        <template v-if="hasBeenUpdated">
-          <span>
-            更新于
-            <XTime :time="post.updatedAt" preset="relative" />
-          </span>
-        </template>
-      </div>
-      <div class="flex items-center gap-4" aria-label="帖子数据">
-        <span>{{ post.viewsCount }} 次浏览</span>
-        <span>{{ post.commentsCount }} 条评论</span>
-      </div>
+      <span class="text-sm font-bold text-ink">
+        {{ post.authorUsername }}
+      </span>
+      <span v-if="hasBeenUpdated">
+        更新于
+        <XTime :time="post.updatedAt" preset="relative" />
+      </span>
+      <span v-else>
+        发布于
+        <XTime :time="post.createdAt" preset="relative" />
+      </span>
+      <span>{{ formatCount(post.viewsCount) }} 次浏览</span>
     </div>
 
     <div v-if="$slots.actions" class="mt-2">

@@ -4,6 +4,7 @@ import { ChatBubbleOutlineOutlined } from '@vicons/material';
 import { XButton } from '@novelia/web-kit';
 
 import type { PostComment } from '@/api';
+import { formatCount } from '@/utils/formatCount';
 import { XAsyncContent } from '@novelia/web-kit';
 import { XPagination } from '@novelia/web-kit';
 
@@ -50,7 +51,7 @@ const emit = defineEmits<{
         :class="{ 'comments-title-highlighted': highlighted }"
       >
         评论
-        <span class="text-muted">{{ commentsCount }}</span>
+        <span class="text-muted">{{ formatCount(commentsCount) }}</span>
       </h2>
       <XButton
         size="sm"

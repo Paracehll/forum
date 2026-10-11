@@ -10,19 +10,11 @@ import { RouterLink } from 'vue-router';
 
 import type { PostSummary } from '@/api';
 import PostTagList from '@/components/PostTagList.vue';
+import { formatCount } from '@/utils/formatCount';
 
 defineProps<{
   post: PostSummary;
 }>();
-
-const countFormatter = new Intl.NumberFormat('en-US', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
-
-function formatCount(value: number) {
-  return countFormatter.format(value).toLowerCase();
-}
 </script>
 
 <template>
