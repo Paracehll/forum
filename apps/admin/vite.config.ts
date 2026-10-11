@@ -1,3 +1,4 @@
+import { themeBootstrapPlugin } from '@novelia/web-kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { execFileSync } from 'node:child_process';
@@ -87,7 +88,7 @@ export default defineConfig(({ command, mode }) => {
       __BUILD_TIME__: JSON.stringify(buildTime),
       __COMMIT_SHA__: JSON.stringify(commitSha),
     },
-    plugins: [vue(), tailwindcss()],
+    plugins: [themeBootstrapPlugin(), vue(), tailwindcss()],
     build: {
       cssCodeSplit: false,
       rolldownOptions: {
