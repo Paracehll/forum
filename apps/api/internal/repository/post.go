@@ -341,8 +341,13 @@ func (r *postRepository) Update(
 	if err != nil {
 		return nil, err
 	}
+	// Metadata changes and unchanged saves must not count as content edits.
+	updatedAt := CASE().
+		WHEN(table.Post.Title.NOT_EQ(String(input.Title)).OR(table.Post.Content.NOT_EQ(String(input.Content)))).
+		THEN(TimestampzT(time.Now())).
+		ELSE(table.Post.UpdatedAt)
 	stmt := table.Post.UPDATE(table.Post.CategoryID, table.Post.Title, table.Post.Content, table.Post.UpdatedAt).
-		SET(Int64(input.CategoryID), String(input.Title), String(input.Content), TimestampzT(time.Now())).
+		SET(Int64(input.CategoryID), String(input.Title), String(input.Content), updatedAt).
 		WHERE(table.Post.ID.EQ(Int64(id))).
 		RETURNING(table.Post.AllColumns)
 	var record model.Post
@@ -355,24 +360,24 @@ func (r *postRepository) Update(
 
 func (r *postRepository) SetStatus(ctx context.Context, id int64, status domain.PostStatus) (err error) {
 	defer func() { err = storageError(err, "post.SetStatus") }()
-	stmt := table.Post.UPDATE(table.Post.Status, table.Post.UpdatedAt).
-		SET(Int16(int16(status)), TimestampzT(time.Now())).
+	stmt := table.Post.UPDATE(table.Post.Status).
+		SET(Int16(int16(status))).
 		WHERE(table.Post.ID.EQ(Int64(id)))
 	return requireAffectedRow(stmt.ExecContext(ctx, executor(ctx, r.db)))
 }
 
 func (r *postRepository) SetCommentsLocked(ctx context.Context, id int64, locked bool) (err error) {
 	defer func() { err = storageError(err, "post.SetCommentsLocked") }()
-	stmt := table.Post.UPDATE(table.Post.CommentsLocked, table.Post.UpdatedAt).
-		SET(Bool(locked), TimestampzT(time.Now())).
+	stmt := table.Post.UPDATE(table.Post.CommentsLocked).
+		SET(Bool(locked)).
 		WHERE(table.Post.ID.EQ(Int64(id)))
 	return requireAffectedRow(stmt.ExecContext(ctx, executor(ctx, r.db)))
 }
 
 func (r *postRepository) SetPinOrder(ctx context.Context, id int64, pinOrder *int32) (err error) {
 	defer func() { err = storageError(err, "post.SetPinOrder") }()
-	stmt := table.Post.UPDATE(table.Post.PinOrder, table.Post.UpdatedAt).
-		SET(pinOrder, TimestampzT(time.Now())).
+	stmt := table.Post.UPDATE(table.Post.PinOrder).
+		SET(pinOrder).
 		WHERE(table.Post.ID.EQ(Int64(id)))
 	return requireAffectedRow(stmt.ExecContext(ctx, executor(ctx, r.db)))
 }
