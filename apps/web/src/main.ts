@@ -10,11 +10,12 @@ import { pinia } from './stores';
 import { useCategoryStore } from './stores/category';
 import './styles.css';
 
+migrateWebKitStorage();
+
 const webKit = createWebKit({
   auth: {
     app: 'f',
     url: __AUTH_URL__,
-    storageKey: 'forum:session:v1',
   },
   brand: '论坛',
   repository: {
@@ -22,7 +23,6 @@ const webKit = createWebKit({
     buildTime: __BUILD_TIME__,
     commitSha: __COMMIT_SHA__,
   },
-  themeStorageKey: 'forum:theme:v1',
 });
 initializeSession(webKit);
 initializeApi(
@@ -42,3 +42,24 @@ createApp(App)
   .mount('#app');
 
 void useCategoryStore().initialize();
+
+// 2026-10-11：迁移旧主题和会话，不覆盖新设置，并清理旧存储键。
+function migrateWebKitStorage() {
+  for (const name of ['theme', 'session']) {
+    try {
+      const oldKey = `forum:${name}:v1`;
+      const newKey = `web-kit:${name}:v1`;
+      const value = localStorage.getItem(oldKey);
+      if (value !== null && localStorage.getItem(newKey) === null) {
+        if (name === 'session') {
+          localStorage.setItem(newKey, value);
+        } else if (value === 'light' || value === 'dark') {
+          localStorage.setItem(newKey, JSON.stringify(value));
+        }
+      }
+      localStorage.removeItem(oldKey);
+    } catch {
+      // 存储不可用或写入失败时保留旧值，继续初始化。
+    }
+  }
+}

@@ -11,10 +11,8 @@ const webKit = createWebKit({
   auth: {
     app: 'f',
     url: __AUTH_URL__,
-    storageKey: 'f-admin-session',
   },
   brand: 'Forum',
-  themeStorageKey: 'f-admin-theme',
   strikes: { enabled: false },
   repository: {
     url: 'https://github.com/auto-novel/forum',
