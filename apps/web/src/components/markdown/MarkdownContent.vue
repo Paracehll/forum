@@ -95,14 +95,10 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 .markdown-content :deep(h1) {
-  padding-bottom: 0.35em;
-  border-bottom: 1px solid var(--color-divider);
   font-size: 1.5em;
 }
 
 .markdown-content :deep(h2) {
-  padding-bottom: 0.3em;
-  border-bottom: 1px solid var(--color-divider);
   font-size: 1.3em;
 }
 
