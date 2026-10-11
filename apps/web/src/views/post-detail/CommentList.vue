@@ -11,6 +11,8 @@ import CommentThread from './CommentThread.vue';
 
 defineProps<{
   comments: PostComment[];
+  highlighted?: boolean;
+  highlightVersion?: number;
   loading: boolean;
   error?: string;
   page: number;
@@ -42,7 +44,11 @@ const emit = defineEmits<{
         { 'border-b border-divider': !composing },
       ]"
     >
-      <h2 class="text-lg font-semibold text-ink">
+      <h2
+        :key="highlightVersion"
+        class="comments-title text-lg font-semibold text-ink"
+        :class="{ 'comments-title-highlighted': highlighted }"
+      >
         评论
         <span class="text-muted">{{ commentsCount }}</span>
       </h2>
@@ -115,3 +121,40 @@ const emit = defineEmits<{
     />
   </section>
 </template>
+
+<style scoped>
+.comments-title,
+.comments-title span {
+  transition: color 350ms ease-out;
+}
+
+.comments-title-highlighted {
+  color: var(--color-warning);
+  animation: comments-title-blink 600ms ease-in-out 2;
+}
+
+.comments-title-highlighted span {
+  color: var(--color-warning);
+}
+
+@keyframes comments-title-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comments-title,
+  .comments-title span {
+    transition: none;
+  }
+
+  .comments-title-highlighted {
+    animation: none;
+  }
+}
+</style>

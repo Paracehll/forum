@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowBackOutlined } from '@vicons/material';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onScopeDispose, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { type Post, type PostComment } from '@/api';
@@ -93,9 +93,27 @@ const {
   toggle: toggleFavorite,
 } = usePostFavorite(post);
 
+const commentsHighlighted = ref(false);
+const commentsHighlightVersion = ref(0);
+let commentsHighlightTimer: ReturnType<typeof setTimeout> | undefined;
+
+function clearCommentsHighlight() {
+  clearTimeout(commentsHighlightTimer);
+  commentsHighlightTimer = undefined;
+  commentsHighlighted.value = false;
+}
+
+watch(postId, clearCommentsHighlight, { flush: 'sync' });
+onScopeDispose(clearCommentsHighlight);
+
 function jumpToComments() {
   const target = document.getElementById('comments');
   if (!target) return;
+  // Feedback must not depend on available scroll space (e.g. short posts).
+  clearTimeout(commentsHighlightTimer);
+  commentsHighlighted.value = true;
+  commentsHighlightVersion.value++;
+  commentsHighlightTimer = setTimeout(clearCommentsHighlight, 1200);
   target.focus({ preventScroll: true });
   target.scrollIntoView({
     behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -286,6 +304,8 @@ function returnToList() {
           <div id="comments" tabindex="-1" class="scroll-mt-20">
             <CommentList
               :comments="comments"
+              :highlighted="commentsHighlighted"
+              :highlight-version="commentsHighlightVersion"
               :loading="commentsLoading"
               :error="commentsError"
               :page="commentPage"
