@@ -44,9 +44,21 @@ const searchQuery = computed(() => {
   return typeof value === 'string' ? value.trim() : '';
 });
 
-const selectedTagId = computed(() => {
-  const value = Number(route.query.tag);
-  return Number.isSafeInteger(value) && value > 0 ? value : undefined;
+const selectedTagIds = computed<number[]>(() => {
+  const raw = route.query.tag;
+  if (!raw) return [];
+  const parts = Array.isArray(raw) ? raw : [raw];
+  const ids: number[] = [];
+  for (const part of parts) {
+    if (part == null) continue;
+    for (const item of String(part).split(',')) {
+      const value = Number(item.trim());
+      if (Number.isSafeInteger(value) && value > 0 && !ids.includes(value)) {
+        ids.push(value);
+      }
+    }
+  }
+  return ids;
 });
 
 const selectedSort = computed<PostSort>(() => {
@@ -65,7 +77,7 @@ const totalPages = computed(() =>
   Math.max(1, Math.ceil(total.value / PAGE_SIZE)),
 );
 const hasFilters = computed(() =>
-  Boolean(searchQuery.value || selectedTagId.value),
+  Boolean(searchQuery.value || selectedTagIds.value.length > 0),
 );
 
 const {
@@ -79,13 +91,13 @@ const {
   pageSize: PAGE_SIZE,
   category: selectedCategory.value,
   query: searchQuery.value || undefined,
-  tagIds: selectedTagId.value ? [selectedTagId.value] : undefined,
+  tagIds: selectedTagIds.value.length ? selectedTagIds.value : undefined,
   sort: selectedSort.value,
 }));
 
 function applyFilters(filters: {
   query: string;
-  tagId?: number;
+  tagIds: number[];
   sort: PostSort;
 }) {
   void router.push({
@@ -93,7 +105,7 @@ function applyFilters(filters: {
     params: { slug: selectedCategory.value },
     query: {
       ...(filters.query ? { q: filters.query } : {}),
-      ...(filters.tagId ? { tag: String(filters.tagId) } : {}),
+      ...(filters.tagIds.length ? { tag: filters.tagIds.join(',') } : {}),
       ...(filters.sort !== 'active' ? { sort: filters.sort } : {}),
     },
   });
@@ -105,7 +117,7 @@ function changePage(nextPage: number) {
     params: { slug: selectedCategory.value },
     query: {
       ...(searchQuery.value ? { q: searchQuery.value } : {}),
-      ...(selectedTagId.value ? { tag: String(selectedTagId.value) } : {}),
+      ...(selectedTagIds.value.length ? { tag: selectedTagIds.value.join(',') } : {}),
       ...(selectedSort.value !== 'active' ? { sort: selectedSort.value } : {}),
       ...(nextPage > 1 ? { page: String(nextPage) } : {}),
     },
@@ -189,7 +201,7 @@ function changePage(nextPage: number) {
           class="lg:flex-1"
           :category-id="selectedCategoryItem.id"
           :query="searchQuery"
-          :tag-id="selectedTagId"
+          :tag-ids="selectedTagIds"
           :sort="selectedSort"
           @apply="applyFilters"
         />

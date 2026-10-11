@@ -125,9 +125,7 @@ func (filter PostFilter) condition() BoolExpression {
 	if len(filter.TagIDs) > 0 {
 		taggedPosts := SELECT(table.PostTag.PostID).
 			FROM(table.PostTag).
-			WHERE(table.PostTag.TagID.IN(integerExpressions(filter.TagIDs)...)).
-			GROUP_BY(table.PostTag.PostID).
-			HAVING(COUNT(table.PostTag.TagID).EQ(Int64(int64(len(filter.TagIDs)))))
+			WHERE(table.PostTag.TagID.IN(integerExpressions(filter.TagIDs)...))
 		expressions = append(expressions, table.Post.ID.IN(taggedPosts))
 	}
 	return AND(expressions...)

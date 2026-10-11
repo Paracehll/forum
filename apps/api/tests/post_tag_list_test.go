@@ -77,6 +77,62 @@ func TestPostListKeepsEveryTagPerPost(t *testing.T) {
 	}
 }
 
+// Filtering by multiple tags uses OR search logic (matching posts with at least one tag).
+func TestPostListMultipleTagORFilter(t *testing.T) {
+	resetDatabase()
+	ctx := context.Background()
+	category, _ := forumcategory.FindByID(forumcategory.NovelID)
+
+	tagA, err := tagRepo.Create(ctx, category.ID, "标签A", 0, 10, `{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tagB, err := tagRepo.Create(ctx, category.ID, "标签B", 1, 20, `{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tagC, err := tagRepo.Create(ctx, category.ID, "标签C", 2, 30, `{}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	post1, err := postRepo.Create(ctx, fixtureCreatePostInput{
+		CategoryID: category.ID, Title: "帖子1", Content: "正文",
+		AuthorID: 1, AuthorUsername: "alice", TagIDs: []int64{tagA.ID}, Attr: `{}`,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	post2, err := postRepo.Create(ctx, fixtureCreatePostInput{
+		CategoryID: category.ID, Title: "帖子2", Content: "正文",
+		AuthorID: 2, AuthorUsername: "bob", TagIDs: []int64{tagB.ID}, Attr: `{}`,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := postRepo.Create(ctx, fixtureCreatePostInput{
+		CategoryID: category.ID, Title: "帖子3", Content: "正文",
+		AuthorID: 3, AuthorUsername: "charlie", TagIDs: []int64{tagC.ID}, Attr: `{}`,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	total, items, err := postRepo.List(ctx, repository.PostFilter{
+		Sort: domain.PostSortNewest, TagIDs: []int64{tagA.ID, tagB.ID},
+	}, 20, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 2 || len(items) != 2 {
+		t.Fatalf("multiple tag OR filter returned %d items (total %d), want 2", len(items), total)
+	}
+
+	gotIDs := map[int64]bool{items[0].ID: true, items[1].ID: true}
+	if !gotIDs[post1.ID] || !gotIDs[post2.ID] {
+		t.Errorf("multiple tag OR filter returned IDs %v, want [%d, %d]", gotIDs, post1.ID, post2.ID)
+	}
+}
+
 // Filtering the page by one tag must not strip the remaining tags from the item.
 func TestPostListTagFilterKeepsEveryTag(t *testing.T) {
 	resetDatabase()
