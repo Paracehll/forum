@@ -70,7 +70,7 @@ function submit() {
 </script>
 
 <template>
-  <form class="space-y-5" @submit.prevent="submit">
+  <form class="space-y-5 pb-16" @submit.prevent="submit">
     <slot name="notice" />
 
     <div>
@@ -179,21 +179,20 @@ function submit() {
     </div>
 
     <div
-      class="flex flex-wrap items-center justify-end gap-3 border-t border-divider pt-5"
+      class="fixed right-4 bottom-4 z-30 flex items-center gap-3 sm:right-6 sm:bottom-6"
     >
-      <div class="flex items-center gap-3">
-        <XButton
-          v-if="showCancel"
-          variant="outline"
-          :disabled="submitting"
-          @click="emit('cancel')"
-        >
-          取消
-        </XButton>
-        <XButton type="submit" :disabled="!canSubmit">
-          {{ submitting ? submittingLabel : submitLabel }}
-        </XButton>
-      </div>
+      <XButton
+        v-if="showCancel"
+        variant="outline"
+        class="bg-surface shadow-lg"
+        :disabled="submitting"
+        @click="emit('cancel')"
+      >
+        取消
+      </XButton>
+      <XButton type="submit" class="shadow-lg" :disabled="!canSubmit">
+        {{ submitting ? submittingLabel : submitLabel }}
+      </XButton>
     </div>
   </form>
 </template>
