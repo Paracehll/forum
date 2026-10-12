@@ -170,7 +170,7 @@ function changePage(nextPage: number) {
           </a>
         </p>
       </aside>
-      <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-start">
         <PostFilters
           class="lg:flex-1"
           :category-id="selectedCategoryItem.id"
