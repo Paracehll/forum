@@ -170,21 +170,6 @@ function changePage(nextPage: number) {
           </a>
         </p>
       </aside>
-      <aside
-        aria-label="新论坛问题反馈提醒"
-        class="space-y-2 text-sm leading-relaxed text-ink"
-      >
-        <p class="text-warning">
-          新论坛已上线，使用中遇到问题欢迎到
-          <RouterLink
-            :to="{ name: 'post-detail', params: { id: 1099 } }"
-            class="text-primary underline underline-offset-4"
-          >
-            《新论坛问题集中反馈贴》
-          </RouterLink>
-          集中反馈。
-        </p>
-      </aside>
       <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
         <PostFilters
           class="lg:flex-1"
