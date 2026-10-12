@@ -42,7 +42,7 @@ const hasBeenUpdated = computed(
       <span>{{ formatCount(post.viewsCount) }} 次浏览</span>
     </div>
 
-    <div v-if="$slots.actions" class="mt-2">
+    <div v-if="$slots.actions" class="mt-4">
       <slot name="actions" />
     </div>
     <div class="my-4 h-px bg-divider" />
