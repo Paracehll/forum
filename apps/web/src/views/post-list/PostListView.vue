@@ -118,30 +118,31 @@ function changePage(nextPage: number) {
 <template>
   <div class="page-container py-4 md:py-6">
     <div class="mx-auto min-w-0 max-w-4xl space-y-4">
-      <header class="flex items-center justify-between gap-3">
-        <h1
-          class="min-w-0 break-words text-2xl font-bold tracking-tight text-ink"
+      <nav aria-label="帖子板块" class="flex border-b border-border lg:hidden">
+        <RouterLink
+          v-for="category in categoryStore.categories"
+          :key="category.slug"
+          :to="{
+            name: 'posts',
+            params: { slug: category.slug },
+            query: {
+              ...(searchQuery ? { q: searchQuery } : {}),
+              ...(selectedSort !== 'active' ? { sort: selectedSort } : {}),
+            },
+          }"
+          :aria-current="
+            selectedCategory === category.slug ? 'page' : undefined
+          "
+          class="min-w-0 flex-1 border-b-2 px-2 py-3 text-center text-sm whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          :class="
+            selectedCategory === category.slug
+              ? 'border-primary font-medium text-primary'
+              : 'border-transparent text-muted hover:text-ink'
+          "
         >
-          {{ selectedCategoryItem.title }}
-        </h1>
-        <div
-          v-if="categoryStore.canPublish(selectedCategory)"
-          class="shrink-0 lg:hidden"
-        >
-          <XButton
-            class="whitespace-nowrap"
-            :as="RouterLink"
-            :to="{
-              name: 'post-create',
-              query: { category: selectedCategory },
-            }"
-            aria-label="发表帖子"
-          >
-            <AddOutlined class="size-4" aria-hidden="true" />
-            发帖
-          </XButton>
-        </div>
-      </header>
+          {{ category.title }}
+        </RouterLink>
+      </nav>
 
       <aside
         v-if="selectedCategory === 'feedback'"
@@ -170,32 +171,31 @@ function changePage(nextPage: number) {
           </a>
         </p>
       </aside>
-      <div class="flex flex-col gap-3 lg:flex-row lg:items-start">
-        <PostFilters
-          class="lg:flex-1"
-          :category-id="selectedCategoryItem.id"
-          :query="searchQuery"
-          :tag-id="selectedTagId"
-          :sort="selectedSort"
-          @apply="applyFilters"
-        />
-        <div
-          v-if="categoryStore.canPublish(selectedCategory)"
-          class="hidden shrink-0 lg:block"
-        >
+      <PostFilters
+        :category-id="selectedCategoryItem.id"
+        :query="searchQuery"
+        :tag-id="selectedTagId"
+        :sort="selectedSort"
+        @apply="applyFilters"
+      >
+        <template #actions>
           <XButton
-            class="whitespace-nowrap"
+            v-if="categoryStore.canPublish(selectedCategory)"
+            class="shrink-0 whitespace-nowrap"
             :as="RouterLink"
             :to="{
               name: 'post-create',
               query: { category: selectedCategory },
             }"
+            aria-label="发表帖子"
           >
             <AddOutlined class="size-4" aria-hidden="true" />
-            发表帖子
+            <span class="lg:hidden">发帖</span>
+            <span class="hidden lg:inline">发表帖子</span>
           </XButton>
-        </div>
-      </div>
+        </template>
+      </PostFilters>
+      <hr class="border-0 border-t border-border" />
       <PostList
         :posts="posts"
         :loading="postsLoading"

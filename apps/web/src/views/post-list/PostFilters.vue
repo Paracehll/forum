@@ -33,13 +33,6 @@ const selectedCategory = computed(
       (category) => category.id === props.categoryId,
     )?.slug ?? categoryStore.defaultCategory.slug,
 );
-const categoryInput = ref(selectedCategory.value);
-const categoryOptions = computed(() =>
-  categoryStore.categories.map((category) => ({
-    label: category.title,
-    value: category.slug,
-  })),
-);
 const queryInput = ref(props.query);
 const tagInput = ref(props.tagId ? String(props.tagId) : ALL_TAGS);
 const sortInput = ref<PostSort>(props.sort);
@@ -56,7 +49,7 @@ const visibleTags = computed(() =>
 );
 
 const tagOptions = computed(() => [
-  { label: '全部', value: ALL_TAGS },
+  { label: '全部标签', value: ALL_TAGS },
   ...visibleTags.value.map((tag) => ({
     label: tag.name,
     value: String(tag.id),
@@ -85,21 +78,13 @@ function syncInputs() {
 function apply() {
   const tagId = Number(tagInput.value);
   emit('apply', {
-    category: categoryInput.value,
+    category: selectedCategory.value,
     query: queryInput.value.trim(),
     tagId: Number.isSafeInteger(tagId) && tagId > 0 ? tagId : undefined,
     sort: sortInput.value,
   });
 }
 
-function changeCategory() {
-  tagInput.value = ALL_TAGS;
-  apply();
-}
-
-watch(selectedCategory, (category) => {
-  categoryInput.value = category;
-});
 watch(() => [props.query, props.tagId, props.sort], syncInputs);
 watch(
   () => props.categoryId,
@@ -134,21 +119,16 @@ watch(
         </span>
       </label>
 
-      <XSelect
-        v-model="categoryInput"
-        :options="categoryOptions"
-        aria-label="选择板块"
-        class="min-w-0 flex-1 sm:w-32 sm:flex-none lg:hidden"
-        @change="changeCategory"
-      />
-
-      <XSelect
-        v-model="sortInput"
-        :options="sortOptions"
-        aria-label="帖子排序"
-        class="min-w-0 flex-1 sm:w-32 sm:flex-none"
-        @change="apply"
-      />
+      <div class="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+        <XSelect
+          v-model="sortInput"
+          :options="sortOptions"
+          aria-label="帖子排序"
+          class="min-w-0 flex-1 sm:w-32 sm:flex-none"
+          @change="apply"
+        />
+        <slot name="actions" />
+      </div>
     </div>
 
     <div
@@ -157,12 +137,6 @@ watch(
       aria-label="按标签过滤"
       class="flex items-start gap-4 px-1"
     >
-      <span
-        class="shrink-0 py-2 text-xs leading-5 text-muted/70"
-        aria-hidden="true"
-      >
-        标签
-      </span>
       <div class="flex min-w-0 flex-wrap gap-x-5 gap-y-1">
         <button
           v-for="option in tagOptions"
