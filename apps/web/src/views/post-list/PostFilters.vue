@@ -135,19 +135,19 @@ watch(
       v-if="tags.length"
       role="group"
       aria-label="按标签过滤"
-      class="flex items-start gap-4 px-1"
+      class="flex items-start gap-4"
     >
-      <div class="flex min-w-0 flex-wrap gap-x-5 gap-y-1">
+      <div class="flex min-w-0 flex-wrap gap-2">
         <button
           v-for="option in tagOptions"
           :key="option.value"
           type="button"
           :aria-pressed="tagInput === option.value"
-          class="min-h-9 max-w-full rounded-sm py-2 text-sm leading-5 break-words decoration-2 underline-offset-8 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+          class="min-h-7 max-w-full rounded-none border px-2 py-0.5 text-sm leading-5 break-words transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
           :class="
             tagInput === option.value
-              ? 'font-medium text-primary underline'
-              : 'text-muted hover:text-ink'
+              ? 'border-primary/25 bg-primary/10 font-medium text-primary'
+              : 'border-transparent bg-ink/5 text-muted hover:bg-ink/10 hover:text-ink'
           "
           @click="selectTag(option.value)"
         >

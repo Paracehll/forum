@@ -53,7 +53,7 @@ const selectedSort = computed<PostSort>(() => {
   const value = route.query.sort;
   return typeof value === 'string' && POST_SORTS.has(value as PostSort)
     ? (value as PostSort)
-    : 'active';
+    : 'updated';
 });
 
 const page = computed(() => {
@@ -95,7 +95,7 @@ function applyFilters(filters: {
     query: {
       ...(filters.query ? { q: filters.query } : {}),
       ...(filters.tagId ? { tag: String(filters.tagId) } : {}),
-      ...(filters.sort !== 'active' ? { sort: filters.sort } : {}),
+      ...(filters.sort !== 'updated' ? { sort: filters.sort } : {}),
     },
   });
 }
@@ -107,7 +107,7 @@ function changePage(nextPage: number) {
     query: {
       ...(searchQuery.value ? { q: searchQuery.value } : {}),
       ...(selectedTagId.value ? { tag: String(selectedTagId.value) } : {}),
-      ...(selectedSort.value !== 'active' ? { sort: selectedSort.value } : {}),
+      ...(selectedSort.value !== 'updated' ? { sort: selectedSort.value } : {}),
       ...(nextPage > 1 ? { page: String(nextPage) } : {}),
     },
   });
@@ -118,6 +118,9 @@ function changePage(nextPage: number) {
 <template>
   <div class="page-container py-4 md:py-6">
     <div class="mx-auto min-w-0 max-w-4xl space-y-4">
+      <h1 class="hidden text-2xl font-semibold leading-7 text-ink lg:block">
+        {{ selectedCategoryItem.title }}
+      </h1>
       <nav aria-label="帖子板块" class="flex border-b border-border lg:hidden">
         <RouterLink
           v-for="category in categoryStore.categories"
@@ -127,7 +130,7 @@ function changePage(nextPage: number) {
             params: { slug: category.slug },
             query: {
               ...(searchQuery ? { q: searchQuery } : {}),
-              ...(selectedSort !== 'active' ? { sort: selectedSort } : {}),
+              ...(selectedSort !== 'updated' ? { sort: selectedSort } : {}),
             },
           }"
           :aria-current="
