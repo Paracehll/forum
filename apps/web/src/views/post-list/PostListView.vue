@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { type PostSort } from '@/api';
-import { useWebKitLayout, XButton } from '@novelia/web-kit';
+import { useWebKitLayout, useWebKitViewport, XButton } from '@novelia/web-kit';
 import { useCategoryStore } from '@/stores/category';
 import { usePostListQuery } from '@/stores/post';
 import PostFilters from './PostFilters.vue';
@@ -22,6 +22,7 @@ const POST_SORTS = new Set<PostSort>([
 const route = useRoute();
 const router = useRouter();
 const { scrollToTop } = useWebKitLayout();
+const { isMobile } = useWebKitViewport();
 const categoryStore = useCategoryStore();
 
 const selectedCategory = computed(() => {
@@ -118,10 +119,10 @@ function changePage(nextPage: number) {
 <template>
   <div class="page-container py-4 md:py-6">
     <div class="mx-auto min-w-0 max-w-4xl space-y-4">
-      <h1 class="hidden text-2xl font-semibold leading-7 text-ink lg:block">
+      <h1 v-if="!isMobile" class="text-2xl font-semibold leading-7 text-ink">
         {{ selectedCategoryItem.title }}
       </h1>
-      <nav aria-label="帖子板块" class="flex border-b border-border lg:hidden">
+      <nav v-else aria-label="帖子板块" class="flex border-b border-border">
         <RouterLink
           v-for="category in categoryStore.categories"
           :key="category.slug"
@@ -193,8 +194,7 @@ function changePage(nextPage: number) {
             aria-label="发表帖子"
           >
             <AddOutlined class="size-4" aria-hidden="true" />
-            <span class="lg:hidden">发帖</span>
-            <span class="hidden lg:inline">发表帖子</span>
+            <span>{{ !isMobile ? '发表帖子' : '发帖' }}</span>
           </XButton>
         </template>
       </PostFilters>
