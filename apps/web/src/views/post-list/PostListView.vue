@@ -84,13 +84,14 @@ const {
 }));
 
 function applyFilters(filters: {
+  category: string;
   query: string;
   tagId?: number;
   sort: PostSort;
 }) {
   void router.push({
     name: 'posts',
-    params: { slug: selectedCategory.value },
+    params: { slug: filters.category },
     query: {
       ...(filters.query ? { q: filters.query } : {}),
       ...(filters.tagId ? { tag: String(filters.tagId) } : {}),

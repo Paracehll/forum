@@ -14,12 +14,32 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  apply: [filters: { query: string; tagId?: number; sort: PostSort }];
+  apply: [
+    filters: {
+      category: string;
+      query: string;
+      tagId?: number;
+      sort: PostSort;
+    },
+  ];
 }>();
 const categoryStore = useCategoryStore();
 
 const ALL_TAGS = 'all';
 
+const selectedCategory = computed(
+  () =>
+    categoryStore.categories.find(
+      (category) => category.id === props.categoryId,
+    )?.slug ?? categoryStore.defaultCategory.slug,
+);
+const categoryInput = ref(selectedCategory.value);
+const categoryOptions = computed(() =>
+  categoryStore.categories.map((category) => ({
+    label: category.title,
+    value: category.slug,
+  })),
+);
 const queryInput = ref(props.query);
 const tagInput = ref(props.tagId ? String(props.tagId) : ALL_TAGS);
 const sortInput = ref<PostSort>(props.sort);
@@ -45,12 +65,21 @@ function syncInputs() {
 function apply() {
   const tagId = Number(tagInput.value);
   emit('apply', {
+    category: categoryInput.value,
     query: queryInput.value.trim(),
     tagId: Number.isSafeInteger(tagId) && tagId > 0 ? tagId : undefined,
     sort: sortInput.value,
   });
 }
 
+function changeCategory() {
+  tagInput.value = ALL_TAGS;
+  apply();
+}
+
+watch(selectedCategory, (category) => {
+  categoryInput.value = category;
+});
 watch(() => [props.query, props.tagId, props.sort], syncInputs);
 watch(
   () => props.categoryId,
@@ -86,6 +115,14 @@ watch(
         ↵
       </span>
     </label>
+
+    <XSelect
+      v-model="categoryInput"
+      :options="categoryOptions"
+      aria-label="选择板块"
+      class="min-w-0 flex-1 sm:w-32 sm:flex-none lg:hidden"
+      @change="changeCategory"
+    />
 
     <XSelect
       v-if="tags.length"
